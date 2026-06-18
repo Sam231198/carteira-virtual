@@ -1,0 +1,18 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^cd \"c:\\\\Users\\\\Samuel Marques\\\\Documents\\\\develop\\\\carteira-virtual\"; docker compose -f docker-compose\\.yml config$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"c:\\\\Users\\\\Samuel Marques\\\\Documents\\\\develop\\\\carteira-virtual\"; docker compose -f docker-compose\\.yml up --build --abort-on-container-exit$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"c:\\\\Users\\\\Samuel Marques\\\\Documents\\\\develop\\\\carteira-virtual\"; docker compose -f docker-compose\\.yml ps$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "docker compose": true,
+        "docker system": true
+    }
+}
