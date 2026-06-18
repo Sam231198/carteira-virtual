@@ -19,6 +19,13 @@ class UserRepository
         return UserEntity::fromArray($user->toArray());
     }
 
+    public function getUserByEmail($email): ?UserEntity
+    {
+        $user = $this->user->where('email', $email)->first();
+
+        return $user ? UserEntity::fromArray($user->toArray()) : null;
+    }
+
     public function createUser(UserEntity $data): UserEntity
     {
         $user = $this->user->create($data);

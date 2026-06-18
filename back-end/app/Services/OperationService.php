@@ -6,7 +6,7 @@ use App\Entities\TransationEntity;
 use App\Entities\WalletEntity;
 use App\Repositories\WalletRepository;
 
-class OparationService
+class OperationService
 {
     public function __construct(
         private WalletRepository $walletRepository,

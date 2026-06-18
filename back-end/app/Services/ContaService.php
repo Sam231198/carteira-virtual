@@ -6,6 +6,7 @@ use App\Entities\UserEntity;
 use App\Entities\WalletEntity;
 use App\Repositories\UserRepository;
 use App\Repositories\WalletRepository;
+use Illuminate\Support\Facades\Hash;
 
 class ContaService
 {
@@ -16,9 +17,25 @@ class ContaService
         // Initialization code if needed
     }
 
+    public function login(string $email, string $password): string
+    {
+        $user = $this->userRepository->getUserByEmail($email);
+
+        if (!$user || !password_verify($password, $user->password)) {
+            throw new \Exception('Invalid credentials');
+        }
+
+        if (!method_exists($user, 'createToken')) {
+            throw new \Exception('Token generation not available for this user.');
+        }
+
+        return $user->{'createToken'}('auth_token')->plainTextToken; // Or return a token or user data as needed
+    }
+
     public function createUserWithWallet(UserEntity $userData, WalletEntity $walletData): UserEntity
     {
         // Create the user
+        $userData->password = Hash::make($userData->password); // Ensure password is hashed
         $user = $this->userRepository->createUser($userData);
 
         // Create the wallet and associate it with the user
