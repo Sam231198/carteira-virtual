@@ -4,30 +4,26 @@ namespace App\Repositories;
 
 use App\Entities\WalletEntity;
 use App\Models\Wallet;
-use Illuminate\Support\Facades\DB;
 
 class WalletRepository
 {
-    public function __construct(private Wallet $wallet)
-    {
-        // Initialization code if needed
-    }
+    public function __construct(private Wallet $wallet) {}
 
-    public function getWalletById($id): ?WalletEntity
+    public function getById(int $id): ?WalletEntity
     {
         $wallet = $this->wallet->find($id);
 
-        return WalletEntity::fromArray($wallet->toArray());
+        return $wallet ? WalletEntity::fromArray($wallet->toArray()) : null;
     }
 
-    public function createWallet(WalletEntity $data): WalletEntity
+    public function create(WalletEntity $data): WalletEntity
     {
         $wallet = $this->wallet->create($data);
 
         return WalletEntity::fromArray($wallet->toArray());
     }
 
-    public function updateWallet($id, WalletEntity $data): WalletEntity
+    public function update(int $id, WalletEntity $data): WalletEntity
     {
         $wallet = $this->wallet->find($id);
 
@@ -40,7 +36,7 @@ class WalletRepository
         return WalletEntity::fromArray($wallet->toArray());
     }
 
-    public function tranfer($fromWalletId, $toWalletId, $amount): bool
+    public function tranfer(int $fromWalletId, int $toWalletId, float $amount): bool
     {
         Wallet::where('id', $fromWalletId)->decrement('balance', $amount);
         Wallet::where('id', $toWalletId)->increment('balance', $amount);
@@ -48,7 +44,7 @@ class WalletRepository
         return true;
     }
 
-    public function deleteWallet($id): bool
+    public function delete(int $id): bool
     {
         $wallet = $this->wallet->find($id);
 

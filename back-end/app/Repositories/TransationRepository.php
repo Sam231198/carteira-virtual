@@ -7,19 +7,16 @@ use App\Models\Transation;
 
 class TransationRepository
 {
-    public function __construct(private Transation $transation)
-    {
-        // Initialization code if needed
-    }
+    public function __construct(private Transation $transation) {}
 
-    public function getWalletByWalletId(int $id): ?TransationEntity
+    public function getByWalletId(int $id): ?TransationEntity
     {
         $transaction = $this->transation->where('wallet_id', $id)->first();
 
         return $transaction ? TransationEntity::fromArray($transaction->toArray()) : null;
     }
 
-    public function getTransactionsByWalletId(int $id, int $limit = 10, int $offset = 0): array
+    public function getListByWalletId(int $id, int $limit = 10, int $offset = 0): array
     {
         return $this->transation->where('wallet_id', $id)
             ->skip($offset)
@@ -30,17 +27,17 @@ class TransationRepository
             })->toArray();
     }
 
-    public function getWalletById(int $id): ?TransationEntity
+    public function getById(int $id): ?TransationEntity
     {
         return TransationEntity::fromArray($this->transation->find($id)->toArray());
     }
 
-    public function createWallet(TransationEntity $data): TransationEntity
+    public function create(TransationEntity $data): TransationEntity
     {
         return TransationEntity::fromArray($this->transation->create($data)->toArray());
     }
 
-    public function updateWallet(int $id, TransationEntity $data): TransationEntity
+    public function update(int $id, TransationEntity $data): TransationEntity
     {
         $wallet = $this->transation->find($id);
 
@@ -53,7 +50,7 @@ class TransationRepository
         return TransationEntity::fromArray($wallet->toArray());
     }
 
-    public function deleteWallet(int $id): bool
+    public function delete(int $id): bool
     {
         $wallet = $this->transation->find($id);
 

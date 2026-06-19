@@ -10,5 +10,12 @@ class Transation extends Model
         'wallet_id',
         'amount',
         'type',
+        'message'
+    ];
+
+    protected $casts = [
+        'amount' => 'float',
+        'wallet_id' => 'integer',
+        'wallet_transfer_id' => 'integer'
     ];
 }

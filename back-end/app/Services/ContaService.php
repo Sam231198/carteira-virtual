@@ -19,7 +19,7 @@ class ContaService
     public function login(string $email, string $password): string
     {
         try {
-            $user = $this->userRepository->getUserByEmail($email);
+            $user = $this->userRepository->getByEmail($email);
 
             if (!$user || !password_verify($password, $user->password)) {
                 throw new \Exception('Invalid credentials');
@@ -40,10 +40,10 @@ class ContaService
     {
         try {
             $userData->password = Hash::make($userData->password);
-            $user = $this->userRepository->createUser($userData);
+            $user = $this->userRepository->create($userData);
 
             $walletData->user_id = $user->id;
-            $this->walletRepository->createWallet($walletData);
+            $this->walletRepository->create($walletData);
 
             return $user;
         } catch (\Exception $e) {
@@ -55,8 +55,8 @@ class ContaService
     public function getUserById(int $id): ?UserEntity
     {
         try {
-            $user = $this->userRepository->getUserById($id);
-            $user->wallet = $this->walletRepository->getWalletById($user->id);
+            $user = $this->userRepository->getById($id);
+            $user->wallet = $this->walletRepository->getById($user->id);
 
             return $user;
         } catch (\Exception $e) {
@@ -68,11 +68,11 @@ class ContaService
     public function updateUserWithWallet(int $id, UserEntity $userData, WalletEntity $walletData): UserEntity
     {
         try {
-            $user = $this->userRepository->updateUser($id, $userData);
+            $user = $this->userRepository->update($id, $userData);
 
-            $wallet = $this->walletRepository->getWalletById($user->id);
+            $wallet = $this->walletRepository->getById($user->id);
             if ($wallet) {
-                $this->walletRepository->updateWallet($wallet->id, $walletData);
+                $this->walletRepository->update($wallet->id, $walletData);
             }
 
             return $user;
@@ -85,12 +85,12 @@ class ContaService
     public function deleteUserWithWallet(int $id): bool
     {
         try {
-            $wallet = $this->walletRepository->getWalletById($id);
+            $wallet = $this->walletRepository->getById($id);
             if ($wallet) {
-                $this->walletRepository->deleteWallet($wallet->id);
+                $this->walletRepository->delete($wallet->id);
             }
 
-            return $this->userRepository->deleteUser($id);
+            return $this->userRepository->delete($id);
         } catch (\Exception $e) {
             Log::error('Delete user failed: ' . $e->getMessage());
             throw $e;

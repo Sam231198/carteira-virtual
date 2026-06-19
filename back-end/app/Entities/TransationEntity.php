@@ -13,6 +13,7 @@ class TransationEntity
         public ?string $created_at,
         public ?string $updated_at,
         public ?int $wallet_transfer_id = 0,
+        public ?string $message = '',
     ) {
         // Initialization code if needed
     }
@@ -26,6 +27,7 @@ class TransationEntity
             amount: $data['amount'] ?? 0.0,
             description: $data['description'] ?? '',
             type: $data['type'] ?? '',
+            message: $data['message'] ?? '',
             created_at: $data['created_at'] ?? null,
             updated_at: $data['updated_at'] ?? null,
         );
@@ -40,6 +42,7 @@ class TransationEntity
             'amount' => $this->amount,
             'description' => $this->description,
             'type' => $this->type,
+            'message' => $this->message,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

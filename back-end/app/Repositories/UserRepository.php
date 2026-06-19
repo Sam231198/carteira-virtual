@@ -7,33 +7,30 @@ use App\Models\User;
 
 class UserRepository
 {
-    public function __construct(private User $user)
-    {
-        // Initialization code if needed
-    }
+    public function __construct(private User $user) {}
 
-    public function getUserById($id): ?UserEntity
+    public function getById(int $id): ?UserEntity
     {
         $user = $this->user->find($id);
 
         return UserEntity::fromArray($user->toArray());
     }
 
-    public function getUserByEmail($email): ?UserEntity
+    public function getByEmail(string $email): ?UserEntity
     {
         $user = $this->user->where('email', $email)->first();
 
         return $user ? UserEntity::fromArray($user->toArray()) : null;
     }
 
-    public function createUser(UserEntity $data): UserEntity
+    public function create(UserEntity $data): UserEntity
     {
         $user = $this->user->create($data);
 
         return UserEntity::fromArray($user->toArray());
     }
 
-    public function updateUser($id, UserEntity $data): UserEntity
+    public function update(int $id, UserEntity $data): UserEntity
     {
         $user = $this->user->find($id);
 
@@ -46,7 +43,7 @@ class UserRepository
         return UserEntity::fromArray($user->toArray());
     }
 
-    public function deleteUser($id): bool
+    public function delete(int $id): bool
     {
         $user = $this->user->find($id);
 

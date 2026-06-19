@@ -16,8 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('wallet_id');
             $table->unsignedBigInteger('wallet_transfer_id')->nullable();
             $table->decimal('amount', 15, 2);
-            $table->enum('type', ['credit', 'debit', 'transfer']);
+            $table->enum('type', ['credit', 'debit', 'transfer', 'reverse']);
+            $table->string('message')->nullable();
             $table->timestamps();
+
+            $table->foreign('wallet_id')->references('id')->on('wallets')->onDelete('cascade');
+            $table->foreign('wallet_transfer_id')->references('id')->on('wallets')->onDelete('cascade');
         });
     }
 
