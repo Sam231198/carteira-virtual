@@ -14,7 +14,20 @@ class TransationRepository
 
     public function getWalletByWalletId(int $id): ?TransationEntity
     {
-        return TransationEntity::fromArray($this->transation->where('wallet_id', $id)->get()->toArray());
+        $transaction = $this->transation->where('wallet_id', $id)->first();
+
+        return $transaction ? TransationEntity::fromArray($transaction->toArray()) : null;
+    }
+
+    public function getTransactionsByWalletId(int $id, int $limit = 10, int $offset = 0): array
+    {
+        return $this->transation->where('wallet_id', $id)
+            ->skip($offset)
+            ->take($limit)
+            ->get()
+            ->map(function ($t) {
+                return TransationEntity::fromArray($t->toArray());
+            })->toArray();
     }
 
     public function getWalletById(int $id): ?TransationEntity

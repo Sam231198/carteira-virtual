@@ -42,28 +42,10 @@ class WalletRepository
 
     public function tranfer($fromWalletId, $toWalletId, $amount): bool
     {
-        $fromWallet = $this->wallet->find($fromWalletId);
-        $toWallet = $this->wallet->find($toWalletId);
+        Wallet::where('id', $fromWalletId)->decrement('balance', $amount);
+        Wallet::where('id', $toWalletId)->increment('balance', $amount);
 
-        if (!$fromWallet || !$toWallet) {
-            throw new \Exception("One or both wallets not found");
-        }
-
-        if ($fromWallet->balance < $amount) {
-            throw new \Exception("Insufficient funds in the source wallet");
-        }
-
-        Wallet::transaction(function () use ($fromWallet, $toWallet, $amount) {
-            $fromWallet->balance -= $amount;
-            $fromWallet->save();
-
-            $toWallet->balance += $amount;
-            $toWallet->save();
-
-            return true;
-        }, 5);
-
-        return false;
+        return true;
     }
 
     public function deleteWallet($id): bool

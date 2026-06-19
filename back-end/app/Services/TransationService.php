@@ -4,32 +4,45 @@ namespace App\Services;
 
 use App\Entities\TransationEntity;
 use App\Repositories\TransationRepository;
-use App\Repositories\UserRepository;
-use App\Repositories\WalletRepository;
+use Illuminate\Support\Facades\Log;
 
 class TransationService
 {
     public function __construct(
         private TransationRepository $transationRepository
-    ) {
-        // Initialization code if needed
-    }
+    ) {}
 
     public function createTransation(TransationEntity $transationData): TransationEntity
     {
-        // Validate the transation data
-        // You can add more complex validation logic here
-        if (empty($transationData->amount) || empty($transationData->type) || empty($transationData->wallet_id)) {
-            throw new \Exception("Invalid transation data");
-        }
+        try {
+            if (empty($transationData->amount) || empty($transationData->type) || empty($transationData->wallet_id)) {
+                throw new \Exception("Invalid transation data");
+            }
 
-        // Create the transation
-        return $this->transationRepository->createWallet($transationData);
+            return $this->transationRepository->createWallet($transationData);
+        } catch (\Exception $e) {
+            Log::error('Create transation failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
-    public function extractTransation(int $walletId)
+    public function extractTransation(int $walletId): ?TransationEntity
     {
-        // Get the transation by ID
-        return $this->transationRepository->getWalletByWalletId($walletId);
+        try {
+            return $this->transationRepository->getWalletByWalletId($walletId);
+        } catch (\Exception $e) {
+            Log::error('Extract transation failed: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function listExtractTransation(int $walletId, int $limit = 10, int $offset = 0): array
+    {
+        try {
+            return $this->transationRepository->getTransactionsByWalletId($walletId, $limit, $offset);
+        } catch (\Exception $e) {
+            Log::error('List extract transation failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
