@@ -9,7 +9,7 @@ const props = defineProps<{
             <text class="navbar-brand">{{ user }}</text>
         </div>
         <div class="col-6 text-end">
-            <button class="btn">
+            <button class="btn btn-danger">
                 exit
             </button>
         </div>
