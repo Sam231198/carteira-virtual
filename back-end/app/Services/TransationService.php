@@ -19,7 +19,7 @@ class TransationService
     {
         // Validate the transation data
         // You can add more complex validation logic here
-        if (empty($transationData['amount']) || empty($transationData['type']) || empty($transationData['wallet_id'])) {
+        if (empty($transationData->amount) || empty($transationData->type) || empty($transationData->wallet_id)) {
             throw new \Exception("Invalid transation data");
         }
 
