@@ -25,10 +25,6 @@ class ContaService
                 throw new \Exception('Invalid credentials');
             }
 
-            if (!method_exists($user, 'createToken')) {
-                throw new \Exception('Token generation not available for this user.');
-            }
-
             return $user->{'createToken'}('auth_token')->plainTextToken;
         } catch (\Exception $e) {
             Log::error('Login failed: ' . $e->getMessage());
