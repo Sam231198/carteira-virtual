@@ -32,14 +32,14 @@ class ContaService
         }
     }
 
-    public function createUserWithWallet(UserEntity $userData, WalletEntity $walletData): UserEntity
+    public function createUserWithWallet(UserEntity $userData): UserEntity
     {
         try {
             $userData->password = Hash::make($userData->password);
             $user = $this->userRepository->create($userData);
 
-            $walletData->user_id = $user->id;
-            $this->walletRepository->create($walletData);
+            $walletData = new WalletEntity(null, $user->id, 0.00);
+            $user->wallet = $this->walletRepository->create($walletData);
 
             return $user;
         } catch (\Exception $e) {

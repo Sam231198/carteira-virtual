@@ -29,12 +29,11 @@ class ContaController extends Controller
     public function createConta(Request $request)
     {
         $data = $request->validate([
-            'user_id' => 'required|integer',
-            'initial_balance' => 'required|numeric',
+            'user_id' => 'required|integer'
         ]);
 
         try {
-            $conta = $this->contaService->createUserWithWallet($data['user_id'], $data['initial_balance']);
+            $conta = $this->contaService->createUserWithWallet($data['user_id']);
             return response()->json($conta, 201);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);

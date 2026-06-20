@@ -4,6 +4,14 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/',
+      name: 'home',
+      component: () => import('../views/Home.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('../views/Login.vue'),
@@ -12,13 +20,13 @@ const router = createRouter({
       }
     },
     {
-      path: '/',
-      name: 'home',
-      component: () => import('../views/Home.vue'),
+      path: '/cadastro',
+      name: 'cadastro',
+      component: () => import('../views/Login.vue'),
       meta: {
-        requiresAuth: true
+        requiresAuth: false
       }
-    },
+    }
   ]
 })
 
@@ -26,7 +34,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const requerAuth = to.meta.requiresAuth
-  console.log('Rota:', to.name, '| requiresAuth:', to.meta.requiresAuth, '| token:', token)
 
   if (requerAuth && !token) {
     next({ name: 'login' })

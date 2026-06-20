@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->decimal('balance', 15, 2)->default(0);
-            $table->string('number')->unique();
             $table->timestamps();
         });
     }
