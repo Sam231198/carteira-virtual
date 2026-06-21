@@ -1,58 +1,153 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Documentação do Back-end
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST em Laravel 13 para a aplicação Carteira Virtual. Esta documentação descreve a stack, as rotas disponíveis, como rodar com Docker e como testar os serviços.
 
-## About Laravel
+## Stack do Back-end
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Laravel 13
+- PHP 8.3
+- MySQL 8.1
+- Laravel Sanctum para autenticação de API
+- Pest para testes automatizados
+- Docker Compose para orquestração de contêineres
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Arquitetura
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- `routes/api.php` — define todas as rotas da API
+- `app/Http/Controllers/ContaController.php` — autenticação, criação de conta, logout e dados do usuário
+- `app/Http/Controllers/OperationController.php` — operações financeiras e histórico
+- `app/Services/ContaService.php` — regras de negócio de conta e usuário
+- `app/Services/OperationService.php` — regras de negócio de operações de carteira
+- `app/Repositories` — acesso a dados e persistência
+- `app/Entities` — representações de domínio para User, Wallet e Transation
 
-## Learning Laravel
+## Endpoints da API
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Autenticação
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### POST `/api/login`
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- Descrição: realiza login do usuário.
+- Parâmetros:
+  - `email` (string, obrigatório)
+  - `password` (string, obrigatório)
+- Retorno sucesso:
+  - Status `201`
+  - JSON com `token` e `user`
+- Retorno erro:
+  - Status `401` em credenciais inválidas
 
-## Agentic Development
+#### POST `/api/conta`
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- Descrição: cria nova conta e carteira associada.
+- Parâmetros:
+  - `name` (string, obrigatório)
+  - `email` (string, obrigatório)
+  - `password` (string, obrigatório, mínimo 6 caracteres)
+- Retorno sucesso:
+  - Status `201`
+  - JSON com os dados do usuário e carteira
+
+#### POST `/api/logout`
+
+- Descrição: encerra a sessão do usuário atual.
+- Requer autenticação via token
+- Retorno sucesso:
+  - Status `200`
+  - JSON com mensagem de logout
+- Erro:
+  - Status `401` se o usuário não estiver autenticado
+
+### Rotas autenticadas
+
+Todas as rotas abaixo exigem `Authorization: Bearer <token>`.
+
+#### GET `/api/conta`
+
+- Descrição: recupera dados do usuário autenticado, incluindo a carteira.
+- Retorno sucesso:
+  - Status `200`
+  - JSON com dados do usuário e `wallet`
+
+#### GET `/api/history/{walletId}`
+
+- Descrição: lista o histórico de transações da carteira.
+- Parâmetros:
+  - `walletId` (inteiro, obrigatório)
+- Retorno sucesso:
+  - Status `200`
+  - JSON com lista de transações
+- Retorno erro:
+  - Status `404` se a carteira não existir
+
+#### POST `/api/deposit`
+
+- Descrição: realiza depósito em uma carteira.
+- Parâmetros:
+  - `wallet_id` (inteiro, obrigatório)
+  - `amount` (numérico, obrigatório)
+- Retorno sucesso:
+  - Status `201`
+  - JSON com carteira atualizada
+- Retorno erro:
+  - Status `404` se a carteira não existir
+
+#### POST `/api/withdraw`
+
+- Descrição: realiza saque de uma carteira.
+- Parâmetros:
+  - `wallet_id` (inteiro, obrigatório)
+  - `amount` (numérico, obrigatório)
+- Retorno sucesso:
+  - Status `201`
+  - JSON com carteira atualizada
+- Retorno erro:
+  - Status `404` se a carteira não existir
+  - Status `400` se fundos insuficientes
+
+#### POST `/api/transfer`
+
+- Descrição: transfere saldo entre carteiras.
+- Parâmetros:
+  - `from_wallet_id` (inteiro, obrigatório)
+  - `to_wallet_id` (inteiro, obrigatório)
+  - `amount` (numérico, obrigatório)
+- Retorno sucesso:
+  - Status `201`
+  - JSON com resultado da transferência
+- Retorno erro:
+  - Status `404` se uma das carteiras não existir
+  - Status `400` se fundos insuficientes
+
+## Execução com Docker
+
+1. A partir da pasta raiz do projeto:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+docker compose up --build
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+2. O serviço backend estará disponível em:
 
-## Contributing
+- `http://localhost:8000`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3. A API base é:
 
-## Code of Conduct
+- `http://localhost:8000/api`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Testes
 
-## Security Vulnerabilities
+- Os testes do back-end estão localizados em `back-end/tests/Unit/Services`.
+- Executar os testes:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cd back-end
+vendor/bin/pest
+```
 
-## License
+## Observações adicionais
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- O serviço de backend está configurado para usar MySQL no container `mysql`.
+- As rotas protegidas usam middleware `auth:sanctum`.
+- Erros internos são registrados via `Log::error` e retornam mensagens genéricas para a API.
+- O código do serviço financeiro trata depósitos, saques, transferências e histórico de transações em transações de banco de dados.
