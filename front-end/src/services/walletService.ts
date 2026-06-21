@@ -11,8 +11,8 @@ export const walletService = {
     return data
   },
 
-  async deposit(walletId: number, amount: number) {
-    const { data, status } = await api.post(`/wallets/${walletId}/deposit`, { amount })
+  async deposit(dados: object) {
+    const { data, status } = await api.post(`/deposit/`, dados)
 
     if (status !== 201) {
       console.error(data)
@@ -21,12 +21,18 @@ export const walletService = {
     return data
   },
 
-  async transfer(fromWalletId: number, toWalletId: number, amount: number) {
-    const { data, status } = await api.post('/wallets/transfer', {
-      from_wallet_id: fromWalletId,
-      to_wallet_id: toWalletId,
-      amount
-    })
+  async transfer(dados: object) {
+    const { data, status } = await api.post(`/transfer/`, dados)
+
+    if (status !== 201) {
+      console.error(data)
+    }
+
+    return data
+  },
+
+  async withdraw(dados: object) {
+    const { data, status } = await api.post(`/withdraw/`, dados)
 
     if (status !== 201) {
       console.error(data)

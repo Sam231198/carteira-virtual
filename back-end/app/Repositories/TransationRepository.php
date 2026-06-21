@@ -32,17 +32,17 @@ class TransationRepository
         return TransationEntity::fromArray($this->transation->find($id)->toArray());
     }
 
-    public function create(TransationEntity $data): TransationEntity
+    public function create(TransationEntity $transactionEntity): TransationEntity
     {
-        return TransationEntity::fromArray($this->transation->create($data)->toArray());
+        return TransationEntity::fromArray($this->transation->create($transactionEntity->toArray())->toArray());
     }
 
-    public function update(int $id, TransationEntity $data): TransationEntity
+    public function update(int $id, TransationEntity $transactionEntity): TransationEntity
     {
         $wallet = $this->transation->find($id);
 
         if ($wallet) {
-            $wallet->update($data);
+            $wallet->update($transactionEntity->toArray());
         } else {
             throw new \Exception("Transation not found");
         }

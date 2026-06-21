@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { format } from 'path';
+
 const props = defineProps<{
   items?: Array<{ type: string; amount: number; created_at?: string }>
 }>()
@@ -20,10 +22,10 @@ const transactions = props.items && props.items.length ? props.items : []
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div class="fw-semibold">{{ item.type }}</div>
-                <div class="text-muted small">{{ item.created_at ?? '—' }}</div>
+                <div class="text-muted small">{{ item.created_at ? new Date(item.created_at).toLocaleString('pt-BR') : '-' }}</div>
               </div>
-              <div :class="['fw-bold', item.amount < 0 ? 'text-danger' : 'text-success']">
-                R$ {{ item.amount.toFixed(2) }}
+              <div :class="['fw-bold', item.type == 'debit' || item.type == 'transfer' ? 'text-danger' : 'text-success']">
+                R$ {{ item.type == 'debit' || item.type == 'transfer' ? '-' : '+' }} {{ item.amount.toFixed(2) }}
               </div>
             </div>
           </li>

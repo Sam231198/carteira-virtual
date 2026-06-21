@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import CardExtrato from '@/components/CardExtrato.vue'
 import CardSaldo from '@/components/CardSaldo.vue'
 import NavBar from '@/components/NavBar.vue'
+import ModalTrasacao from '@/components/ModalTrasacao.vue'
 import { contaService } from '@/services/contaService'
 import { walletService } from '@/services/walletService'
 import { useRouter } from 'vue-router'
@@ -13,6 +14,8 @@ const user = ref<any>(null)
 const saldo = ref(0)
 const atividades = ref<any[]>([])
 const carregando = ref(true)
+const showModal = ref(false)
+const modalType = ref<'deposit' | 'withdraw' | 'transfer'>('deposit')
 
 onMounted(async () => {
   try {
@@ -42,6 +45,34 @@ onMounted(async () => {
     carregando.value = false
   }
 })
+
+function openTransactionModal(type: 'deposit' | 'withdraw' | 'transfer') {
+  modalType.value = type
+  showModal.value = true
+}
+
+async function handleTransaction(payload: { action: string, amount: number | null, targetEmail: string }) {
+  const walletId = user.value?.wallet?.id
+  console.log(walletId)
+  if (!walletId || !payload.amount) return
+
+  try {
+    if (payload.action === 'deposit') {
+      await walletService.deposit({ wallet_id: walletId, amount: payload.amount })
+    } else if (payload.action === 'withdraw') {
+      await walletService.withdraw({ wallet_id: walletId, amount: payload.amount })
+    } else if (payload.action === 'transfer') {
+      await walletService.transfer({ from_wallet_id: walletId, to_wallet_id: payload.targetEmail, amount: payload.amount })
+    }
+
+    const data = await contaService.getConta()
+    saldo.value = data?.wallet?.balance ?? 0
+    atividades.value = await walletService.getTransactions(walletId) ?? []
+
+  } catch (e: any) {
+    console.error('Erro na transação:', e.response?.data?.message || e.message)
+  }
+}
 </script>
 
 <template>
@@ -65,18 +96,13 @@ onMounted(async () => {
               </p>
             </div>
           </div>
-          <div class="col-12 col-md-5 text-md-end mt-4 mt-md-0">
-            <div class="hero-actions d-inline-flex gap-2 flex-wrap justify-content-md-end">
-              <button class="btn btn-primary btn-lg">Ver extrato</button>
-            </div>
-          </div>
         </div>
       </section>
 
       <div class="container">
         <div class="row g-4">
           <div class="col-12 col-xl-5">
-            <CardSaldo :saldo="saldo" />
+            <CardSaldo :saldo="saldo" @open-modal="openTransactionModal" />
           </div>
           <div class="col-12 col-xl-7">
             <CardExtrato :items="atividades" />
@@ -84,6 +110,12 @@ onMounted(async () => {
         </div>
       </div>
     </main>
+
+    <ModalTrasacao
+      v-model:show="showModal"
+      :action="modalType"
+      @confirm="handleTransaction"
+    />
   </template>
 </template>
 

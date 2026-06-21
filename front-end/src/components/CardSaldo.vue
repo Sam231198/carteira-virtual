@@ -2,6 +2,12 @@
 const props = defineProps<{
   saldo: number
 }>()
+
+const emit = defineEmits(['open-modal'])
+
+function openModal(type: 'deposit' | 'withdraw' | 'transfer') {
+  emit('open-modal', type)
+}
 </script>
 
 <template>
@@ -14,9 +20,9 @@ const props = defineProps<{
           <p class="text-muted mb-0">Seu saldo está atualizado em tempo real.</p>
         </div>
         <div class="col-12 col-md-5 d-flex flex-wrap gap-2 justify-content-md-end">
-          <button class="btn btn-success btn-sm flex-grow-1">Depositar</button>
-          <button class="btn btn-danger btn-sm flex-grow-1">Sacar</button>
-          <button class="btn btn-primary btn-sm flex-grow-1">Transferir</button>
+          <button class="btn btn-success btn-sm flex-grow-1" @click="openModal('deposit')">Depositar</button>
+          <button class="btn btn-danger btn-sm flex-grow-1" @click="openModal('withdraw')">Sacar</button>
+          <button class="btn btn-primary btn-sm flex-grow-1" @click="openModal('transfer')">Transferir</button>
         </div>
       </div>
     </div>

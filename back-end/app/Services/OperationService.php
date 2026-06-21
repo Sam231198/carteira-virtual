@@ -56,7 +56,7 @@ class OperationService
                 $wallet->balance = $wallet->balance + $amount;
                 $updatedWallet = $this->walletRepository->update($walletId, $wallet);
 
-                $this->recordTransation($walletId, $amount, 'deposit');
+                $this->recordTransation($walletId, $amount, 'credit');
 
                 return [
                     'status' => 201,
@@ -64,7 +64,7 @@ class OperationService
                 ];
             });
         } catch (\Exception $e) {
-            $this->recordTransation($walletId, $amount, 'deposit', 0, 'Falha no depósito');
+            $this->recordTransation($walletId, $amount, 'credit', 0, 'Falha no depósito');
             Log::error('Deposit failed: ' . $e->getMessage());
             return [
                 'status' => 500,
@@ -97,7 +97,7 @@ class OperationService
 
                 $updatedWallet = $this->walletRepository->update($walletId, $wallet);
 
-                $this->recordTransation($walletId, $amount, 'withdraw');
+                $this->recordTransation($walletId, $amount, 'debit');
 
                 return [
                     'status' => 201,
@@ -105,8 +105,8 @@ class OperationService
                 ];
             });
         } catch (\Exception $e) {
-            $this->recordTransation($walletId, $amount, 'withdraw', 0, 'Falha no saque');
-            Log::error('Withdraw failed: ' . $e->getMessage());
+            $this->recordTransation($walletId, $amount, 'debit', 0, 'Falha no saque');
+            Log::error('Debit failed: ' . $e->getMessage());
             return [
                 'status' => 500,
                 'content' => 'Internal server error'
@@ -188,7 +188,7 @@ class OperationService
         }
     }
 
-    private function recordTransation(int $walletId, float $amount, string $type, int $walletIdTransfer = 0, string $message = ''): void
+    private function recordTransation(int $walletId, float $amount, string $type, ?int $walletIdTransfer = null, string $message = ''): void
     {
         $transition = TransationEntity::fromArray([
             'wallet_id' => $walletId,
