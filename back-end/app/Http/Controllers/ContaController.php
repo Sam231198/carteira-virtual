@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\ContaService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ContaController extends Controller
@@ -49,5 +50,18 @@ class ContaController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 404);
         }
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $user->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Logout realizado com sucesso']);
     }
 }

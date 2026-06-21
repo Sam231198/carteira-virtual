@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [\App\Http\Controllers\ContaController::class, 'login']);
 Route::post('/conta', [\App\Http\Controllers\ContaController::class, 'createConta']);
+Route::post('/logout', [\App\Http\Controllers\ContaController::class, 'logout']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/conta', [\App\Http\Controllers\ContaController::class, 'getConta']);

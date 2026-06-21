@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { format } from 'path';
 
 const props = defineProps<{
   items?: Array<{ type: string; amount: number; created_at?: string }>

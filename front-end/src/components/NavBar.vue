@@ -1,7 +1,15 @@
 <script setup lang="ts">
+import { authService } from '@/services/authService';
+
 const props = defineProps<{
   userName: string
 }>()
+
+function logout() {
+  authService.logout().then(() => {
+    window.location.href = '/login'
+  })
+}
 </script>
 <template>
   <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top py-3">
@@ -12,7 +20,7 @@ const props = defineProps<{
           <div class="small">Bem vindo</div>
           <strong>{{ props.userName }}</strong>
         </div>
-        <button class="btn btn-outline-danger btn-sm">Sair</button>
+        <button class="btn btn-outline-danger btn-sm" @click="logout()">Sair</button>
       </div>
     </div>
   </nav>
