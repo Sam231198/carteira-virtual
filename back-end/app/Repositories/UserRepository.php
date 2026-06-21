@@ -11,7 +11,7 @@ class UserRepository
 
     public function getById(int $id): ?UserEntity
     {
-        $user = $this->user->find($id);
+        $user = $this->user->with('wallet')->find($id);
 
         return UserEntity::fromArray($user->toArray());
     }
@@ -20,6 +20,7 @@ class UserRepository
     {
         $user = $this->user
         ->select('id', 'name', 'email', 'password')
+        ->with('wallet')
         ->where('email', $email)->first();
 
         return $user;

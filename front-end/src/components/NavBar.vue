@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{
-  user: string
+  userName: string
 }>()
 </script>
 <template>
@@ -10,7 +10,7 @@ const props = defineProps<{
       <div class="d-flex align-items-center gap-3">
         <div class="user-info text-muted text-end">
           <div class="small">Bem vindo</div>
-          <strong>{{ props.user }}</strong>
+          <strong>{{ props.userName }}</strong>
         </div>
         <button class="btn btn-outline-danger btn-sm">Sair</button>
       </div>

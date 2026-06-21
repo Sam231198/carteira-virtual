@@ -2,26 +2,46 @@ import api from './api'
 
 export const walletService = {
   async getWallet(walletId: number) {
-    const { data } = await api.get(`/wallets/${walletId}`)
+    const { data, status } = await api.get(`/wallets/${walletId}`)
+
+    if (status !== 200) {
+      console.error(data)
+    }
+
     return data
   },
 
   async deposit(walletId: number, amount: number) {
-    const { data } = await api.post(`/wallets/${walletId}/deposit`, { amount })
+    const { data, status } = await api.post(`/wallets/${walletId}/deposit`, { amount })
+
+    if (status !== 201) {
+      console.error(data)
+    }
+
     return data
   },
 
   async transfer(fromWalletId: number, toWalletId: number, amount: number) {
-    const { data } = await api.post('/wallets/transfer', {
+    const { data, status } = await api.post('/wallets/transfer', {
       from_wallet_id: fromWalletId,
       to_wallet_id: toWalletId,
       amount
     })
+
+    if (status !== 201) {
+      console.error(data)
+    }
+
     return data
   },
 
   async getTransactions(walletId: number) {
-    const { data } = await api.get(`/wallets/${walletId}/transactions`)
+    const { data, status } = await api.get(`/history/${walletId}`)
+
+    if (status !== 200) {
+      console.error(data)
+    }
+
     return data
   }
 }

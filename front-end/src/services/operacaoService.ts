@@ -2,27 +2,57 @@ import api from "./api";
 
 export const operacaoService = {
   async getConta() {
-    const { data } = await api.get('/conta')
+    const { data, status } = await api.get('/conta')
+
+    if (status !== 200) {
+      console.error(data)
+      return
+    }
+
     return data
   },
 
   async getExtrato(walletId: number) {
-    const { data } = await api.get(`/operation/${walletId}`)
+    const { data, status } = await api.get(`/operation/${walletId}`)
+
+    if (status !== 200) {
+      console.error(data)
+      return
+    }
+
     return data
   },
 
   async deposit(value: number) {
-    const { data } = await api.post('/deposit', { value })
+    const { data, status } = await api.post('/deposit', { value })
+
+    if (status !== 201) {
+      console.error(data)
+      return
+    }
+
     return data
   },
 
   async withdraw(value: number) {
-    const { data } = await api.post('/withdraw', { value })
+    const { data, status } = await api.post('/withdraw', { value })
+
+    if (status !== 201) {
+      console.error(data)
+      return
+    }
+
     return data
   },
 
   async transfer(value: number, conta_id: number) {
-    const { data } = await api.post('/transfer', { value, conta_id })
+    const { data, status } = await api.post('/transfer', { value, conta_id })
+
+    if (status !== 201) {
+      console.error(data)
+      return
+    }
+
     return data
   },
 }

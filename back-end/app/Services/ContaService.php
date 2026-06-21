@@ -49,7 +49,6 @@ class ContaService
         try {
             $userEntity = UserEntity::fromArray($userData);
 
-            $userEntity->password = Hash::make($userEntity->password);
             $userEntity = $this->userRepository->create($userEntity);
 
             $walletEntity = new WalletEntity(null, $userEntity->id, 0.00);
@@ -72,7 +71,6 @@ class ContaService
     {
         try {
             $user = $this->userRepository->getById($id);
-            $user->wallet = $this->walletRepository->getById($user->id);
 
             return [
                 'status' => 200,

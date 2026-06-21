@@ -35,9 +35,9 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const requerAuth = to.meta.requiresAuth
 
-  if (requerAuth && !token) {
+  if (requerAuth && (!token || token === undefined || token === null || token === '')) {
     next({ name: 'login' })
-  } else if (to.name === 'login' && token) {
+  } else if (to.name === 'login' && token && token !== undefined && token !== null && token !== '') {
     next({ name: 'home' })
   } else {
     next()

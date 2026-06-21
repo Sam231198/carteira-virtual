@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { authService } from '@/services/authService'
+import router from '@/router'
 
 const email = ref('')
 const senha = ref('')
@@ -11,7 +11,7 @@ const carregando = ref(false)
 async function login() {
   erro.value = ''
 
-  if (!email.value || !senha.value) {
+  if (!email.value || !senha.value || email.value.length < 5 || senha.value.length < 6) {
     erro.value = 'Preencha todos os campos.'
     return
   }
@@ -20,7 +20,15 @@ async function login() {
     carregando.value = true
     const data = await authService.login(email.value, senha.value)
 
+    if (!data || !data.token) {
+      erro.value = 'Credenciais inválidas.'
+      return
+    }
+
     localStorage.setItem('token', data.token)
+    localStorage.setItem('user', JSON.stringify(data.user))
+
+    router.push({ name: 'home' })
 
   } catch (e: any) {
     erro.value = e.response?.data?.message || 'Erro ao realizar login.'
@@ -50,7 +58,7 @@ async function login() {
 
         <div v-if="erro" class="alert alert-danger py-2 small">{{ erro }}</div>
 
-        <button @click="login" class="btn btn-primary w-100" :disabled="carregando">
+        <button type="button" @click.prevent="login" class="btn btn-primary w-100" :disabled="carregando">
           {{ carregando ? 'Entrando...' : 'Entrar' }}
         </button>
 

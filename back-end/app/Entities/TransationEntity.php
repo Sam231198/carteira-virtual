@@ -11,7 +11,6 @@ class TransationEntity
         public ?string $description,
         public ?string $type, // 'income' or 'expense'
         public ?string $created_at,
-        public ?string $updated_at,
         public ?int $wallet_transfer_id,
         public ?string $message,
     ) {
@@ -29,7 +28,6 @@ class TransationEntity
             type: $data['type'] ?? null,
             message: $data['message'] ?? null,
             created_at: $data['created_at'] ?? null,
-            updated_at: $data['updated_at'] ?? null,
         );
     }
 
@@ -44,7 +42,6 @@ class TransationEntity
             'type' => $this->type,
             'message' => $this->message,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }

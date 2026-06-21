@@ -1,27 +1,42 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { authService } from '@/services/authService'
+import router from '@/router'
 
 const email = ref('')
-const senha = ref('')
-const nome = ref('')
+const password = ref('')
+const name = ref('')
 const erro = ref('')
 const carregando = ref(false)
 
 async function cadastro() {
   erro.value = ''
 
-  if (!nome.value || !email.value || !senha.value) {
+  if (!name.value || !email.value || !password.value) {
     erro.value = 'Preencha todos os campos.'
     return
   }
 
   try {
     carregando.value = true
-    const data = await authService.cadastro(nome.value, email.value, senha.value)
-    await authService.login(email.value, senha.value)
+    const user = await authService.cadastro(name.value, email.value, password.value)
+
+    if (!user.name) {
+      erro.value = 'Erro ao realizar cadastro.'
+      return
+    }
+
+    const data = await authService.login(email.value, password.value)
+
+    if (!data) {
+      erro.value = 'Cadastro realizado! Faça login para continuar.'
+      return
+    }
+
     localStorage.setItem('token', data.token)
+    localStorage.setItem('user', JSON.stringify(data.user))
+
+    router.push({ name: 'home' })
 
   } catch (e: any) {
     erro.value = e.response?.data?.message || 'Erro ao realizar cadastro.'
@@ -42,7 +57,7 @@ async function cadastro() {
 
         <div class="mb-3">
           <label class="form-label small">Nome</label>
-          <input v-model="nome" type="text" class="form-control" placeholder="Seu nome" />
+          <input v-model="name" type="text" class="form-control" placeholder="Seu nome" />
         </div>
 
         <div class="mb-3">
@@ -52,12 +67,12 @@ async function cadastro() {
 
         <div class="mb-3">
           <label class="form-label small">Senha</label>
-          <input v-model="senha" type="password" class="form-control" placeholder="••••••••" />
+          <input v-model="password" type="password" class="form-control" placeholder="••••••••" />
         </div>
 
         <div v-if="erro" class="alert alert-danger py-2 small">{{ erro }}</div>
 
-        <button @click="cadastro" class="btn btn-primary w-100" :disabled="carregando">
+        <button type="button" @click.prevent="cadastro" class="btn btn-primary w-100" :disabled="carregando">
           {{ carregando ? 'Cadastrando...' : 'Cadastrar' }}
         </button>
 

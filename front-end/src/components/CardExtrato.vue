@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{
-  items?: Array<{ title: string; amount: number; date?: string }>
+  items?: Array<{ type: string; amount: number; created_at?: string }>
 }>()
 
 const transactions = props.items && props.items.length ? props.items : []
@@ -14,13 +14,13 @@ const transactions = props.items && props.items.length ? props.items : []
         <ul class="list-group list-group-flush">
           <li
             v-for="item in transactions"
-            :key="item.title + item.date"
+            :key="item.type + item.created_at"
             class="list-group-item px-0 py-3 border-0"
           >
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <div class="fw-semibold">{{ item.title }}</div>
-                <div class="text-muted small">{{ item.date ?? '—' }}</div>
+                <div class="fw-semibold">{{ item.type }}</div>
+                <div class="text-muted small">{{ item.created_at ?? '—' }}</div>
               </div>
               <div :class="['fw-bold', item.amount < 0 ? 'text-danger' : 'text-success']">
                 R$ {{ item.amount.toFixed(2) }}

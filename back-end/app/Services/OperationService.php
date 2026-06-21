@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Entities\TransationEntity;
-use App\Entities\WalletEntity;
 use App\Repositories\TransationRepository;
 use App\Repositories\WalletRepository;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +27,10 @@ class OperationService
                 ];
             }
 
-            return $this->transationRepository->getListByWalletId($walletId);
+            return [
+                'status' => 200,
+                'content' => $this->transationRepository->getListByWalletId($walletId)
+            ];
         } catch (\Exception $e) {
             Log::error('Get history failed: ' . $e->getMessage());
             return [

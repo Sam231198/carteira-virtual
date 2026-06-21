@@ -16,7 +16,7 @@ class OperationController extends Controller
     {
         try {
             $result = $this->operationService->getHistory($walletId);
-            return response()->json($result);
+            return response()->json($result['content'], $result['status']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
@@ -31,7 +31,7 @@ class OperationController extends Controller
 
         try {
             $result = $this->operationService->deposit($data['wallet_id'], $data['amount']);
-            return response()->json($result);
+            return response()->json($result['content'], $result['status']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
@@ -46,7 +46,7 @@ class OperationController extends Controller
 
         try {
             $result = $this->operationService->withdraw($data['wallet_id'], $data['amount']);
-            return response()->json($result);
+            return response()->json($result['content'], $result['status']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
@@ -62,7 +62,7 @@ class OperationController extends Controller
 
         try {
             $result = $this->operationService->transfer($data['from_wallet_id'], $data['to_wallet_id'], $data['amount']);
-            return response()->json(['success' => $result]);
+            return response()->json($result['content'], $result['status']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }

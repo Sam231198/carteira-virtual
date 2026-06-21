@@ -18,7 +18,7 @@ class ContaController extends Controller
 
         try {
             $conta = $this->contaService->login($credentials['email'], $credentials['password']);
-            return response()->json($conta);
+            return response()->json($conta['content'], $conta['status']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 401);
         }
@@ -29,12 +29,12 @@ class ContaController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string'],
             'password' => ['required', 'string', 'min:6'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => ['required', 'email'],
         ]);
 
         try {
             $conta = $this->contaService->createUserWithWallet($data);
-            return response()->json($conta, 201);
+            return response()->json($conta['content'], $conta['status']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
@@ -45,7 +45,7 @@ class ContaController extends Controller
         try {
             $user = $request->user(); // Ensure the user is authenticated
             $conta = $this->contaService->getUserById($user->id);
-            return response()->json($conta);
+            return response()->json($conta['content'], $conta['status']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 404);
         }
