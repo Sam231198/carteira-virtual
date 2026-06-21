@@ -1,48 +1,83 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use App\Services\TransationService;
+namespace Tests\Unit\Services;
+
 use App\Entities\TransationEntity;
+use App\Repositories\TransationRepository;
+use App\Services\TransationService;
+use Tests\TestCase;
 
 class TransationServiceTest extends TestCase
 {
-    public function test_create_transation_validates_and_calls_repository()
-    {
-        $transationData = TransationEntity::fromArray(['wallet_id' => 1, 'amount' => 10.0, 'type' => 'deposit']);
-
-        $transRepo = $this->createMock(\App\Repositories\TransationRepository::class);
-        $transRepo->expects($this->once())->method('createWallet')->with($this->isInstanceOf(TransationEntity::class))->willReturn($transationData);
-
-        $service = new TransationService($transRepo);
-        $result = $service->createTransation($transationData);
-
-        $this->assertInstanceOf(TransationEntity::class, $result);
-        $this->assertEquals(10.0, $result->amount);
-    }
-
-    public function test_create_transation_throws_on_invalid_data()
-    {
-        $transationData = TransationEntity::fromArray(['wallet_id' => null, 'amount' => 0, 'type' => '']);
-
-        $transRepo = $this->createMock(\App\Repositories\TransationRepository::class);
-        $service = new TransationService($transRepo);
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Invalid transation data');
-
-        $service->createTransation($transationData);
-    }
-
-    public function test_extract_transation_returns_repository_result()
+    public function test_extract_returns_200_on_success()
     {
         $walletId = 5;
-        $transRepo = $this->createMock(\App\Repositories\TransationRepository::class);
-        $transRepo->expects($this->once())->method('getWalletByWalletId')->with($walletId)->willReturn(\App\Entities\TransationEntity::fromArray(['id' => 1, 'wallet_id' => $walletId, 'amount' => 5.0, 'type' => 'deposit']));
+        $expected = TransationEntity::fromArray(['id' => 1, 'wallet_id' => $walletId, 'amount' => 50.0, 'type' => 'deposit', 'description' => null, 'message' => null, 'created_at' => null]);
 
-        $service = new TransationService($transRepo);
-        $result = $service->extractTransation($walletId);
+        $transationRepo = $this->createMock(TransationRepository::class);
+        $transationRepo->expects($this->once())
+            ->method('getByWalletId')
+            ->with($walletId)
+            ->willReturn($expected);
 
-        $this->assertInstanceOf(TransationEntity::class, $result);
-        $this->assertEquals($walletId, $result->wallet_id);
+        $service = new TransationService($transationRepo);
+        $result = $service->extract($walletId);
+
+        $this->assertSame(200, $result['status']);
+        $this->assertSame($expected, $result['content']);
+    }
+
+    public function test_extract_returns_500_on_exception()
+    {
+        $walletId = 5;
+
+        $transationRepo = $this->createMock(TransationRepository::class);
+        $transationRepo->expects($this->once())
+            ->method('getByWalletId')
+            ->with($walletId)
+            ->willThrowException(new \Exception('fail'));
+
+        $service = new TransationService($transationRepo);
+        $result = $service->extract($walletId);
+
+        $this->assertSame(500, $result['status']);
+        $this->assertSame('Internal server error', $result['content']);
+    }
+
+    public function test_list_returns_200_on_success()
+    {
+        $walletId = 5;
+        $expected = [
+            ['id' => 1, 'wallet_id' => $walletId, 'amount' => 10.0],
+        ];
+
+        $transationRepo = $this->createMock(TransationRepository::class);
+        $transationRepo->expects($this->once())
+            ->method('getListByWalletId')
+            ->with($walletId, 10, 0)
+            ->willReturn($expected);
+
+        $service = new TransationService($transationRepo);
+        $result = $service->list($walletId);
+
+        $this->assertSame(200, $result['status']);
+        $this->assertSame($expected, $result['content']);
+    }
+
+    public function test_list_returns_500_on_exception()
+    {
+        $walletId = 5;
+
+        $transationRepo = $this->createMock(TransationRepository::class);
+        $transationRepo->expects($this->once())
+            ->method('getListByWalletId')
+            ->with($walletId, 10, 0)
+            ->willThrowException(new \Exception('fail'));
+
+        $service = new TransationService($transationRepo);
+        $result = $service->list($walletId);
+
+        $this->assertSame(500, $result['status']);
+        $this->assertSame('Internal server error', $result['content']);
     }
 }
