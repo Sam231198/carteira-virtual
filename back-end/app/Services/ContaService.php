@@ -16,69 +16,103 @@ class ContaService
         private WalletRepository $walletRepository
     ) {}
 
-    public function login(string $email, string $password): string
+    public function login(string $email, string $password): array
     {
         try {
-            $user = $this->userRepository->getByEmail($email);
+            $user = $this->userRepository->getByEmailLogin($email);
 
-            if (!$user || !password_verify($password, $user->password)) {
-                throw new \Exception('Invalid credentials');
+            if (!$user || !Hash::check($password, $user->password)) {
+                return [
+                    'status' => 401,
+                    'content' => 'Invalid credentials'
+                ];
             }
 
-            return $user->{'createToken'}('auth_token')->plainTextToken;
+            return [
+                'status' => 201,
+                'content' => [
+                    'token' => $user->createToken('auth_token')->plainTextToken,
+                    'user' => $user
+                ]
+            ];
         } catch (\Exception $e) {
             Log::error('Login failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 
-    public function createUserWithWallet(UserEntity $userData): UserEntity
+    public function createUserWithWallet(array $userData): array
     {
         try {
-            $userData->password = Hash::make($userData->password);
-            $user = $this->userRepository->create($userData);
+            $userEntity = UserEntity::fromArray($userData);
 
-            $walletData = new WalletEntity(null, $user->id, 0.00);
-            $user->wallet = $this->walletRepository->create($walletData);
+            $userEntity->password = Hash::make($userEntity->password);
+            $userEntity = $this->userRepository->create($userEntity);
 
-            return $user;
+            $walletEntity = new WalletEntity(null, $userEntity->id, 0.00);
+            $userEntity->wallet = $this->walletRepository->create($walletEntity);
+
+            return [
+                'status' => 201,
+                'content' => $userEntity
+            ];
         } catch (\Exception $e) {
             Log::error('Create user failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 
-    public function getUserById(int $id): ?UserEntity
+    public function getUserById(int $id): array
     {
         try {
             $user = $this->userRepository->getById($id);
             $user->wallet = $this->walletRepository->getById($user->id);
 
-            return $user;
+            return [
+                'status' => 200,
+                'content' => $user
+            ];
         } catch (\Exception $e) {
             Log::error('Get user failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 
-    public function updateUserWithWallet(int $id, UserEntity $userData, WalletEntity $walletData): UserEntity
+    public function updateUserWithWallet(int $id, array $userData, array $walletData): array
     {
         try {
-            $user = $this->userRepository->update($id, $userData);
+            $user = UserEntity::fromArray($userData);
+            $user = $this->userRepository->update($id, $user);
 
             $wallet = $this->walletRepository->getById($user->id);
             if ($wallet) {
-                $this->walletRepository->update($wallet->id, $walletData);
+                $wallet = WalletEntity::fromArray($walletData);
+                $this->walletRepository->update($wallet->id, $wallet);
             }
 
-            return $user;
+            return [
+                'status' => 200,
+                'content' => $user
+            ];
         } catch (\Exception $e) {
             Log::error('Update user failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 
-    public function deleteUserWithWallet(int $id): bool
+    public function deleteUserWithWallet(int $id): array
     {
         try {
             $wallet = $this->walletRepository->getById($id);
@@ -86,10 +120,16 @@ class ContaService
                 $this->walletRepository->delete($wallet->id);
             }
 
-            return $this->userRepository->delete($id);
+            return [
+                'status' => 204,
+                'content' => null
+            ];
         } catch (\Exception $e) {
             Log::error('Delete user failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 }

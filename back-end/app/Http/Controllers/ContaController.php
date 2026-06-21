@@ -7,9 +7,7 @@ use Illuminate\Http\Request;
 
 class ContaController extends Controller
 {
-    public function __construct(private ContaService $contaService)
-    {
-    }
+    public function __construct(private ContaService $contaService) {}
 
     public function login(Request $request)
     {
@@ -29,11 +27,13 @@ class ContaController extends Controller
     public function createConta(Request $request)
     {
         $data = $request->validate([
-            'user_id' => 'required|integer'
+            'name' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:6'],
+            'email' => ['required', 'email', 'unique:users,email'],
         ]);
 
         try {
-            $conta = $this->contaService->createUserWithWallet($data['user_id']);
+            $conta = $this->contaService->createUserWithWallet($data);
             return response()->json($conta, 201);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);

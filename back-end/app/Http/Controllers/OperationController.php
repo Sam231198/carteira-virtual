@@ -12,6 +12,16 @@ class OperationController extends Controller
         // Initialization code if needed
     }
 
+    public function getHistory(int $walletId)
+    {
+        try {
+            $result = $this->operationService->getHistory($walletId);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
     public function deposit(Request $request)
     {
         $data = $request->validate([

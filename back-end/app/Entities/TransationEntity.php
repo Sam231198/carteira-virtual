@@ -12,8 +12,8 @@ class TransationEntity
         public ?string $type, // 'income' or 'expense'
         public ?string $created_at,
         public ?string $updated_at,
-        public ?int $wallet_transfer_id = 0,
-        public ?string $message = '',
+        public ?int $wallet_transfer_id,
+        public ?string $message,
     ) {
         // Initialization code if needed
     }
@@ -21,13 +21,13 @@ class TransationEntity
     static public function fromArray(array $data): self
     {
         return new self(
-            id: $data['id'] ?? 0,
-            wallet_id: $data['wallet_id'] ?? 0,
-            wallet_transfer_id: $data['wallet_transfer_id'] ?? 0,
-            amount: $data['amount'] ?? 0.0,
-            description: $data['description'] ?? '',
-            type: $data['type'] ?? '',
-            message: $data['message'] ?? '',
+            id: $data['id'] ?? null,
+            wallet_id: $data['wallet_id'] ?? null,
+            wallet_transfer_id: $data['wallet_transfer_id'] ?? null,
+            amount: $data['amount'] ?? null,
+            description: $data['description'] ?? null,
+            type: $data['type'] ?? null,
+            message: $data['message'] ?? null,
             created_at: $data['created_at'] ?? null,
             updated_at: $data['updated_at'] ?? null,
         );

@@ -16,14 +16,14 @@ class WalletRepository
         return $wallet ? WalletEntity::fromArray($wallet->toArray()) : null;
     }
 
-    public function create(WalletEntity $data): WalletEntity
+    public function create(WalletEntity $walletEntity): WalletEntity
     {
-        $wallet = $this->wallet->create($data);
+        $wallet = $this->wallet->create($walletEntity->toArray());
 
         return WalletEntity::fromArray($wallet->toArray());
     }
 
-    public function update(int $id, WalletEntity $data): WalletEntity
+    public function update(int $id, WalletEntity $walletEntity): WalletEntity
     {
         $wallet = $this->wallet->find($id);
 
@@ -31,7 +31,7 @@ class WalletRepository
             throw new \Exception("Wallet not found");
         }
 
-        $wallet->update($data);
+        $wallet->update($walletEntity->toArray());
 
         return WalletEntity::fromArray($wallet->toArray());
     }

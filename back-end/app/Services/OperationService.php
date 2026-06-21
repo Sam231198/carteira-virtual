@@ -16,14 +16,39 @@ class OperationService
         private TransationRepository $transationRepository
     ) {}
 
-    public function deposit(int $walletId, float $amount): WalletEntity
+    public function getHistory(int $walletId): array
+    {
+        try {
+            $wallet = $this->walletRepository->getById($walletId);
+
+            if (!$wallet) {
+                return [
+                    'status' => 404,
+                    'content' => 'Wallet not found'
+                ];
+            }
+
+            return $this->transationRepository->getListByWalletId($walletId);
+        } catch (\Exception $e) {
+            Log::error('Get history failed: ' . $e->getMessage());
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
+        }
+    }
+
+    public function deposit(int $walletId, float $amount): array
     {
         try {
             return DB::transaction(function () use ($walletId, $amount) {
                 $wallet = $this->walletRepository->getById($walletId);
 
                 if (!$wallet) {
-                    throw new \Exception("Wallet not found");
+                    return [
+                        'status' => 404,
+                        'content' => 'Wallet not found'
+                    ];
                 }
 
                 $wallet->balance = $wallet->balance + $amount;
@@ -31,27 +56,39 @@ class OperationService
 
                 $this->recordTransation($walletId, $amount, 'deposit');
 
-                return $updatedWallet;
+                return [
+                    'status' => 201,
+                    'content' => $updatedWallet
+                ];
             });
         } catch (\Exception $e) {
             $this->recordTransation($walletId, $amount, 'deposit', 0, 'Falha no depósito');
             Log::error('Deposit failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 
-    public function withdraw(int $walletId, float $amount): WalletEntity
+    public function withdraw(int $walletId, float $amount): array
     {
         try {
             return DB::transaction(function () use ($walletId, $amount) {
                 $wallet = $this->walletRepository->getById($walletId);
 
                 if (!$wallet) {
-                    throw new \Exception("Wallet not found");
+                    return [
+                        'status' => 404,
+                        'content' => 'Wallet not found'
+                    ];
                 }
 
                 if ($wallet->balance < $amount) {
-                    throw new \Exception("Insufficient funds");
+                    return [
+                        'status' => 400,
+                        'content' => 'Insufficient funds'
+                    ];
                 }
 
                 $wallet->balance = $wallet->balance - $amount;
@@ -60,16 +97,22 @@ class OperationService
 
                 $this->recordTransation($walletId, $amount, 'withdraw');
 
-                return $updatedWallet;
+                return [
+                    'status' => 201,
+                    'content' => $updatedWallet
+                ];
             });
         } catch (\Exception $e) {
             $this->recordTransation($walletId, $amount, 'withdraw', 0, 'Falha no saque');
             Log::error('Withdraw failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 
-    public function transfer(int $fromWalletId, int $toWalletId, float $amount): bool
+    public function transfer(int $fromWalletId, int $toWalletId, float $amount): array
     {
         try {
             return DB::transaction(function () use ($fromWalletId, $toWalletId, $amount) {
@@ -77,11 +120,17 @@ class OperationService
                 $toWallet = $this->walletRepository->getById($toWalletId);
 
                 if (!$fromWallet || !$toWallet) {
-                    throw new \Exception("One or both wallets not found");
+                    return [
+                        'status' => 404,
+                        'content' => 'One or both wallets not found'
+                    ];
                 }
 
                 if ($fromWallet->balance < $amount) {
-                    throw new \Exception("Insufficient funds in the source wallet");
+                    return [
+                        'status' => 400,
+                        'content' => 'Insufficient funds in the source wallet'
+                    ];
                 }
 
                 $result = $this->walletRepository->tranfer($fromWalletId, $toWalletId, $amount);
@@ -89,23 +138,32 @@ class OperationService
                 $this->recordTransation($fromWalletId, $amount, 'transfer', $toWalletId);
                 $this->recordTransation($toWalletId, $amount, 'transfer', $fromWalletId);
 
-                return $result;
+                return [
+                    'status' => 201,
+                    'content' => $result
+                ];
             });
         } catch (\Exception $e) {
             $this->recordTransation($fromWalletId, $amount, 'transfer', $toWalletId, 'Falha na transferência');
             $this->recordTransation($toWalletId, $amount, 'transfer', $fromWalletId, 'Falha na transferência');
             Log::error('Transfer failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 
-    public function recoveryTransfer(int $transationId): bool
+    public function recoveryTransfer(int $transationId): array
     {
         try {
             $transation = $this->transationRepository->getById($transationId);
 
             if (!$transation) {
-                throw new \Exception("Transation not found");
+                return [
+                    'status' => 404,
+                    'content' => 'Transation not found'
+                ];
             }
 
             $result = $this->walletRepository->tranfer($transation->wallet_transfer_id, $transation->wallet_id, $transation->amount);
@@ -113,12 +171,18 @@ class OperationService
             $this->recordTransation($transation->wallet_id, $transation->amount, 'reverse', $transation->wallet_transfer_id, 'Recovery transfer');
             $this->recordTransation($transation->wallet_transfer_id, $transation->amount, 'reverse', $transation->wallet_id, 'Recovery transfer');
 
-            return $result;
+            return [
+                'status' => 201,
+                'content' => $result
+            ];
         } catch (\Exception $e) {
             $this->recordTransation($transation->wallet_id, $transation->amount, 'reverse', $transation->wallet_transfer_id, 'Falha na recuperação da transferência');
             $this->recordTransation($transation->wallet_transfer_id, $transation->amount, 'reverse', $transation->wallet_id, 'Falha na recuperação da transferência');
             Log::error('Recovery transfer failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 

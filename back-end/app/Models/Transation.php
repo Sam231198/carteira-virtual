@@ -2,20 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
+#[Fillable(['wallet_id', 'amount', 'type', 'message'])]
 class Transation extends Model
 {
-    protected $fillable = [
-        'wallet_id',
-        'amount',
-        'type',
-        'message'
-    ];
-
-    protected $casts = [
-        'amount' => 'float',
-        'wallet_id' => 'integer',
-        'wallet_transfer_id' => 'integer'
-    ];
 }

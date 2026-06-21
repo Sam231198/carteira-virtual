@@ -12,23 +12,35 @@ class TransationService
         private TransationRepository $transationRepository
     ) {}
 
-    public function extract(int $walletId): ?TransationEntity
+    public function extract(int $walletId): array
     {
         try {
-            return $this->transationRepository->getByWalletId($walletId);
+            return [
+                'status' => 200,
+                'content' => $this->transationRepository->getByWalletId($walletId)
+            ];
         } catch (\Exception $e) {
             Log::error('Extract transation failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 
     public function list(int $walletId, int $limit = 10, int $offset = 0): array
     {
         try {
-            return $this->transationRepository->getListByWalletId($walletId, $limit, $offset);
+            return [
+                'status' => 200,
+                'content' => $this->transationRepository->getListByWalletId($walletId, $limit, $offset)
+            ];
         } catch (\Exception $e) {
             Log::error('List extract transation failed: ' . $e->getMessage());
-            throw $e;
+            return [
+                'status' => 500,
+                'content' => 'Internal server error'
+            ];
         }
     }
 }

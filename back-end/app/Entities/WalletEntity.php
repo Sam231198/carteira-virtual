@@ -15,9 +15,18 @@ class WalletEntity
     static public function fromArray(array $data): self
     {
         return new self(
-            id: $data['id'] ?? 0,
-            user_id: $data['user_id'] ?? 0,
-            balance: $data['balance'] ?? 0.0
+            id: $data['id'] ?? null,
+            user_id: $data['user_id'] ?? null,
+            balance: $data['balance'] ?? null
         );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'user_id' => $this->user_id,
+            'balance' => $this->balance
+        ];
     }
 }

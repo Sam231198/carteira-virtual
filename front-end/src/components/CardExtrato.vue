@@ -1,25 +1,54 @@
 <script setup lang="ts">
-import ItensAtividade from './ItensAtividade.vue';
+const props = defineProps<{
+  items?: Array<{ title: string; amount: number; date?: string }>
+}>()
 
-// defineProps<{
-//     saldo: number
-// }>()
-
-let array = [
-    {
-        title: 'teste',
-        amount: 0.00
-    }
-]
+const transactions = props.items && props.items.length ? props.items : []
 </script>
+
 <template>
-    <div class="card">
-        <div class="card-header">Atividades</div>
-        <div class="card-body">
-            <ul>
-                <ItensAtividade v-for="element in array" :key="element.title" :title="element.title"
-                    :amount="element.amount" />
-            </ul>
-        </div>
+  <div class="card extrato-card h-100">
+    <div class="card-header">Atividades Recentes</div>
+    <div class="card-body">
+      <div v-if="transactions.length">
+        <ul class="list-group list-group-flush">
+          <li
+            v-for="item in transactions"
+            :key="item.title + item.date"
+            class="list-group-item px-0 py-3 border-0"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold">{{ item.title }}</div>
+                <div class="text-muted small">{{ item.date ?? '—' }}</div>
+              </div>
+              <div :class="['fw-bold', item.amount < 0 ? 'text-danger' : 'text-success']">
+                R$ {{ item.amount.toFixed(2) }}
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div v-else class="text-center text-muted py-4">
+        Nenhuma movimentação recente encontrada.
+      </div>
     </div>
+  </div>
 </template>
+
+<style scoped>
+.extrato-card .card-header {
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.list-group-item {
+  border-radius: 0.9rem;
+  background: #f8fbff;
+  margin-bottom: 0.75rem;
+}
+
+.list-group-item:last-child {
+  margin-bottom: 0;
+}
+</style>

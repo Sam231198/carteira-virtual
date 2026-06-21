@@ -16,16 +16,18 @@ class UserRepository
         return UserEntity::fromArray($user->toArray());
     }
 
-    public function getByEmail(string $email): ?UserEntity
+    public function getByEmailLogin(string $email): ?User
     {
-        $user = $this->user->where('email', $email)->first();
+        $user = $this->user
+        ->select('id', 'name', 'email', 'password')
+        ->where('email', $email)->first();
 
-        return $user ? UserEntity::fromArray($user->toArray()) : null;
+        return $user;
     }
 
     public function create(UserEntity $data): UserEntity
     {
-        $user = $this->user->create($data);
+        $user = $this->user->create($data->toArray());
 
         return UserEntity::fromArray($user->toArray());
     }
@@ -38,7 +40,7 @@ class UserRepository
             throw new \Exception("User not found");
         }
 
-        $user->update($data);
+        $user->update($data->toArray());
 
         return UserEntity::fromArray($user->toArray());
     }
