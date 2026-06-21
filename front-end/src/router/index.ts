@@ -30,18 +30,18 @@ const router = createRouter({
   ]
 })
 
-// Guard para proteção de rotas
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const token = localStorage.getItem('token')
-  const requerAuth = to.meta.requiresAuth
 
-  if (requerAuth && (!token || token === undefined || token === null || token === '')) {
-    next({ name: 'login' })
-  } else if (to.name === 'login' && token && token !== undefined && token !== null && token !== '') {
-    next({ name: 'home' })
-  } else {
-    next()
+  if (to.meta.requiresAuth && !token) {
+    return { name: 'login' }
   }
+
+  if (to.name === 'login' && token) {
+    return { name: 'home' }
+  }
+
+  return true
 })
 
 export default router
